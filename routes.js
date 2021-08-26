@@ -1,5 +1,4 @@
 'use strict';
-
 var express = require('express');
 var router = express.Router();
 const bcrypt = require('bcrypt');
@@ -60,7 +59,7 @@ router.get('/courses', asyncHandler(async(req, res) => {
 
 router.post('/courses', asyncHandler(async(req, res) => {
   try {
-    const course = Course.create(req.body);
+    const course = await Course.create(req.body);
     res.status(201).location('/courses/' + course.id).end();
   } catch (error) {
     console.log('ERROR: ', error.name);
@@ -81,18 +80,24 @@ router.get('/courses/:id', asyncHandler(async(req, res) => {
 
 router.put('/courses/:id', asyncHandler(async(req, res) => {
   const course = await Course.findByPk(req.params.id);
+  const errors = [];
 
-  try {
-    await course.update(req.body);
-    res.status(204).end();
-  } catch (error) {
-    console.log('ERROR: ', error.name);
+  if (!req.body.title || !req.body.description) {  // if no title or description in the put body, it is denied
+    errors.push('Please provide a title and description');
+    res.status(400).json({ errors });
+  } else {
+    try {
+      await course.update(req.body);
+      res.status(204).end();
+    } catch (error) {
+      console.log('ERROR: ', error.name);
 
-    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-      const errors = error.errors.map(err => err.message);
-      res.status(400).json({ errors });   
-    } else {
-      throw error;
+      if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+        const errors = error.errors.map(err => err.message);
+        res.status(400).json({ errors });   
+      } else {
+        throw error;
+      }
     }
   }
 }));
