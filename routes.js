@@ -4,27 +4,8 @@ var router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('./models').User;
 const Course = require('./models').Course;
-
-function asyncHandler(cb){
-  return async (req, res, next) => {
-    try {
-      await cb(req, res, next)
-    } catch(err) {
-      next(err);
-    }
-  }
-}
-
-function catchError() {  // i reused this code a lot, so i have made it into a function
-  console.log('ERROR: ', error.name);
-
-  if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-    const errors = error.errors.map(err => err.message);
-    res.status(400).json({ errors });   
-  } else {
-    throw error;
-  }
-}
+const { asyncHandler } = require('./middleware/async-handler');
+const { catchError } = require('./middleware/catchError');
 
 // route that gets all users
 router.get('/users', asyncHandler(async (req, res) => {
