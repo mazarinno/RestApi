@@ -6,11 +6,18 @@ const User = require('./models').User;
 const Course = require('./models').Course;
 const { asyncHandler } = require('./middleware/async-handler');
 const { catchError } = require('./middleware/catchError');
+const { authenticateUser } = require('./middleware/auth-user');
 
-// route that gets all users
-router.get('/users', asyncHandler(async (req, res) => {
-  let users = await User.findAll();
-  res.json(users);
+// route that returns currently authenticated user
+router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
+  const authUser = req.currentUser;
+
+  try {
+    const user = await User.findByPk(authUser.id);
+    res.status(200).json(user);
+  } catch {
+    res.status(400).json({ message: "User not found"});
+  }
 }));
 
 // Route that creates a new user.
@@ -32,7 +39,7 @@ router.post('/users', asyncHandler(async(req, res) => {
       await User.create(user);
       res.status(201).location('/').end();
     } catch (error) {
-        catchError();
+        catchError(res, error);
     }  
   }
 }));
@@ -47,7 +54,7 @@ router.post('/courses', asyncHandler(async(req, res) => {
     const course = await Course.create(req.body);
     res.status(201).location('/courses/' + course.id).end();
   } catch (error) {
-      catchError();
+      catchError(res, error);
   }  
 }));
 
@@ -68,7 +75,7 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
       await course.update(req.body);
       res.status(204).end();
     } catch (error) {
-        catchError();
+        catchError(res, error);
     }
   }
 }));
@@ -80,7 +87,7 @@ router.delete('/courses/:id', asyncHandler(async(req, res) => {
     await course.destroy();
     res.status(204).end();
   } catch (error) {
-      catchError();
+      catchError(res, error);
   }
 }));
 

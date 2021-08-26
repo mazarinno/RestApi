@@ -1,4 +1,4 @@
-function catchError() {  // i reused this code a lot, so i have made it into a function
+exports.catchError = (res, error) => {  
   console.log('ERROR: ', error.name);
 
   if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
