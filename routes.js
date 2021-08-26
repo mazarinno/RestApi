@@ -15,6 +15,17 @@ function asyncHandler(cb){
   }
 }
 
+function catchError() {  // i reused this code a lot, so i have made it into a function
+  console.log('ERROR: ', error.name);
+
+  if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+    const errors = error.errors.map(err => err.message);
+    res.status(400).json({ errors });   
+  } else {
+    throw error;
+  }
+}
+
 // route that gets all users
 router.get('/users', asyncHandler(async (req, res) => {
   let users = await User.findAll();
@@ -40,14 +51,7 @@ router.post('/users', asyncHandler(async(req, res) => {
       await User.create(user);
       res.status(201).location('/').end();
     } catch (error) {
-      console.log('ERROR: ', error.name);
-
-      if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-        const errors = error.errors.map(err => err.message);
-        res.status(400).json({ errors });   
-      } else {
-        throw error;
-      }
+        catchError();
     }  
   }
 }));
@@ -62,14 +66,7 @@ router.post('/courses', asyncHandler(async(req, res) => {
     const course = await Course.create(req.body);
     res.status(201).location('/courses/' + course.id).end();
   } catch (error) {
-    console.log('ERROR: ', error.name);
-
-    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-      const errors = error.errors.map(err => err.message);
-      res.status(400).json({ errors });   
-    } else {
-      throw error;
-    }
+      catchError();
   }  
 }));
 
@@ -90,14 +87,7 @@ router.put('/courses/:id', asyncHandler(async(req, res) => {
       await course.update(req.body);
       res.status(204).end();
     } catch (error) {
-      console.log('ERROR: ', error.name);
-
-      if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-        const errors = error.errors.map(err => err.message);
-        res.status(400).json({ errors });   
-      } else {
-        throw error;
-      }
+        catchError();
     }
   }
 }));
@@ -109,14 +99,7 @@ router.delete('/courses/:id', asyncHandler(async(req, res) => {
     await course.destroy();
     res.status(204).end();
   } catch (error) {
-    console.log('ERROR: ', error.name);
-
-    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-      const errors = error.errors.map(err => err.message);
-      res.status(400).json({ errors });   
-    } else {
-      throw error;
-    }
+      catchError();
   }
 }));
 
