@@ -46,7 +46,7 @@ router.post('/users', asyncHandler(async(req, res) => {
 
 // returns all courses
 router.get('/courses', asyncHandler(async(req, res) => {
-	let courses = await Course.findAll();
+	let courses = await Course.findAll({include: [{ model: User }]});
   res.status(200).json(courses);
 }));
 
@@ -65,7 +65,7 @@ router.post('/courses', authenticateUser, asyncHandler(async(req, res) => {
 
 // returns a specific course by id number
 router.get('/courses/:id', asyncHandler(async(req, res) => {
-  const course = await Course.findByPk(req.params.id);
+  const course = await Course.findByPk(req.params.id, {include: [{ model: User }]});
   res.status(200).json(course);
 }));
 
