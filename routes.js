@@ -32,16 +32,12 @@ router.post('/users', asyncHandler(async(req, res) => {
     user.password = bcrypt.hashSync(user.password, 10);
   }
 
-  if (errors.length > 0) {
-    res.status(400).json({ errors });
-  } else { 
-    try {
-      await User.create(user);
-      res.status(201).location('/').end();
-    } catch (error) {
-        catchError(res, error);
-    }  
-  }
+  try {
+    await User.create(user);
+    res.status(201).location('/').end();
+  } catch (error) {
+      catchError(res, error);
+  }  
 }));
 
 // returns all courses
@@ -75,8 +71,11 @@ router.put('/courses/:id', authenticateUser, asyncHandler(async(req, res) => {
   const authUser = req.currentUser;
   const errors = [];
 
-  if (!req.body.title || !req.body.description) {  // if no title or description in the put body, it is denied
-    errors.push('Please provide a title and description');
+  if (!req.body.title) {  // if no title or description in the put body, it is denied
+    errors.push('Please provide a title');
+    res.status(400).json({ errors });
+  } else if (!req.body.description) {
+    errors.push('Please provide a description');
     res.status(400).json({ errors });
   } else {
     try {
