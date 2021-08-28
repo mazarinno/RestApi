@@ -73,19 +73,24 @@ router.put('/courses/:id', authenticateUser, asyncHandler(async(req, res) => {
 
   if (!req.body.title) {  // if no title or description in the put body, it is denied
     errors.push('Please provide a title');
-    res.status(400).json({ errors });
-  } else if (!req.body.description) {
+  } 
+
+  if (!req.body.description) {
     errors.push('Please provide a description');
-    res.status(400).json({ errors });
-  } else {
-    try {
-      await User.findByPk(authUser.id);
-      await course.update(req.body);
+  } 
+
+  try {
+    await User.findByPk(authUser.id);
+    await course.update(req.body);
+    
+    if (errors.length > 0) {
+      res.status(400).json({ errors });
+    } else {
       res.status(204).end();
-    } catch (error) {
-        catchError(res, error);
-    }
-  }
+    } 
+  } catch (error) {
+      catchError(res, error)
+  } 
 }));
 
 // allows an authenticated user to delete an existing course
